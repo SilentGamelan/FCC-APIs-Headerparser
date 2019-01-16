@@ -1,6 +1,6 @@
 {
 	"name": "request_header",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "API project for freeCodeCamp",
 	"main": "server.js",
 	"scripts": {
@@ -15,12 +15,15 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://hyperdev.com/#!/project/welcome-project"
-	},
+		"url": "https://github.com/SilentGamelan/FCC-APIs-Headerparser.git"
+    },
 	"keywords": [
 		"node",
 		"hyperdev",
-		"express"
+		"express",
+        "fcc",
+        "HTTP",
+        "parsing"
 	],
 	"license": "MIT"
 }
