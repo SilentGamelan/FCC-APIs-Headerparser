@@ -5,6 +5,7 @@
 
 const http = require('http');
 const URL = require('url'); 
+const fs = require('fs');
 
 const hostname = '127.0.0.1';
 const port = 3000;
@@ -44,19 +45,27 @@ const server = http.createServer((req, res) => {
     
       
     if(method === 'GET') {
-
-        if(path === '/api/whoami') {            
-            res.writeHead(OK, { 'content-type': 'application/json'});
-            let parsedHeader = {
-                "ipaddress": ip,
-                "language": headers["accept-language"],
-                "software": headers["user-agent"]
-            }
-            res.write(JSON.stringify(parsedHeader));
-            
+        switch(path) {
+            case '/':
+                break;
+            case ('/api/whoami'):
+                res.writeHead(OK, { 'content-type': 'application/json'});
+                let parsedHeader = {
+                    "ipaddress": ip,
+                    "language": headers["accept-language"],
+                    "software": headers["user-agent"]
+                }
+                res.write(JSON.stringify(parsedHeader));
+                // res.end()?
+            default:
+                
         }
     }
-        
+        // TODO
+        // - encapsulate routing into functions to simplify switch 
+        // - serve static page with css for main
+        // - have a 404 response as default
+        // - delete node-router.js
 });
 
 server.listen(port, hostname, () => {
