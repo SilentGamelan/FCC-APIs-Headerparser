@@ -54,10 +54,10 @@ const server = http.createServer((req, res) => {
         res.end('Error: Please contact the administrator');
     });
 
-    let reqPath = URL.parse(url, true).pathname;
+    let reqURL = URL.parse(url, true).pathname;
 
     if(method === 'GET') {
-        switch(reqPath) {
+        switch(reqURL) {
             case '/':
                 renderStaticPage("index.html", req, res);
                 break;
@@ -65,7 +65,7 @@ const server = http.createServer((req, res) => {
                 parseHeader(headers, req, res);
                 break;
             default:
-                renderStaticPage(reqPath, req, res);
+                renderStaticPage(reqURL, req, res);
                 break;
         }
     } else {
@@ -101,15 +101,15 @@ function parseHeader(headers, req, res) {
     res.end();
 }
    
-function renderStaticPage(reqPath, req, res) {
+function renderStaticPage(reqURL, req, res) {
     
     let contentType = "text/html";
     
     // extract the file extension, if any
-    let ext = reqPath.match(/\.([a-zA-Z]{1,4})$/);
+    let ext = reqURL.match(/\.([a-zA-Z]{1,4})$/);
 
     try {    
-        fs.readFile(reqPath, (err, data) => {
+        fs.readFile(reqURL, (err, data) => {
         
             let myErr = null;
             if(err) {myErr = err.code};
