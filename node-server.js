@@ -13,6 +13,23 @@ const OK = 200;
 const CLIENTERROR = 400
 const NOTFOUND = 404
 const SERVERERROR = 500
+
+const MIMETYPE = {
+   'html':  'text/html',
+   'css':   'text/css',
+    "js":    'text/js',
+    'jpg':  'img/jpeg',
+    'jpeg': 'img/jpeg',
+    'bmp':  'img/bmp',
+    'gif':  'img/gif',
+    'ico':  'img/x-icon'
+}
+
+const publicPath = "./public/";
+const viewsPath = "./views/";
+    
+
+   
 /*
 // Status code 200 = standard HTTP success response (OK)
 // Content type = Message Body Information Header
@@ -37,10 +54,10 @@ const server = http.createServer((req, res) => {
         res.end('Error: Please contact the administrator');
     });
 
-    let path = URL.parse(url, true).pathname;
+    let reqPath = URL.parse(url, true).pathname;
 
     if(method === 'GET') {
-        switch(path) {
+        switch(reqPath) {
             case '/':
                 renderStaticPage("index.html", req, res);
                 break;
@@ -48,28 +65,21 @@ const server = http.createServer((req, res) => {
                 parseHeader(headers, req, res);
                 break;
             default:
-                renderStaticPage(path, req, res);
+                renderStaticPage(reqPath, req, res);
                 break;
         }
+    } else {
+        // TODO
+        res.writeHead(500)
+        res.write("Method Not Supported Yet")
+        res.end();
     }
+
         // !TODO
-        // Read https://stackoverflow.com/questions/5823722/how-to-serve-an-image-using-nodejs
-        // and
+        // fix missing pageName variable
         //      https://stackoverflow.com/a/26354478
-        // add ELSE to IF(method)
         // - delete node-router.js
-        // - rewrite extension and path construction to use a dictionary of MIME types to remove need for case structure
-        // - Fix 404 logic -> no PAGENAME variable, and think can be de-spaghettified
-        /*
-                extensions = {
-            ".html" : "text/html",
-            ".css" : "text/css",
-            ".js" : "application/javascript",
-            ".png" : "image/png",
-            ".gif" : "image/gif",
-            ".jpg" : "image/jpeg"
-        };
-        */
+       
 });
 
 server.listen(port, hostname, () => {
@@ -91,46 +101,15 @@ function parseHeader(headers, req, res) {
     res.end();
 }
    
-function renderStaticPage(path, req, res) {
+function renderStaticPage(reqPath, req, res) {
     
-    const publicPath = "./public/";
-    const viewsPath = "./views/";
     let contentType = "text/html";
     
     // extract the file extension, if any
-    let ext = path.match(/\.([a-zA-Z]{1,4})$/);
-   
-    if(ext) {
-        switch(ext[1]){
-            case 'css':
-                path = publicPath + path;
-                contentType = 'text/css'
-                break;
-            case 'js': 
-                path = publicPath + path;
-                contentType = 'text/js';
-                break;
-            case 'html':
-                path = viewsPath + path;
-                contentType = 'text/html';
-                break;
-            case 'jpg':
-            case 'jpeg':
-                path = viewsPath + path;
-                contentType = 'image/jpeg'
-                break;
-            case 'bmp':
-                path = viewsPath + path;
-                contentType = 'image/bmp'
-            case 'gif':
-            case 'ico':
-                path = viewsPath + path;
-                contentType = 'image/x-icon';
-        }
-    } 
+    let ext = reqPath.match(/\.([a-zA-Z]{1,4})$/);
 
     try {    
-        fs.readFile(path, (err, data) => {
+        fs.readFile(reqPath, (err, data) => {
         
             let myErr = null;
             if(err) {myErr = err.code};
