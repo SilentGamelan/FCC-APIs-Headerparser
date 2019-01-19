@@ -72,7 +72,7 @@ const server = http.createServer((req, res) => {
         let reqFile = req.url.split(reqPath)
         switch(reqPath) {
             case '/':
-                renderStaticPage(reqPath, "./index.html", req, res);
+                renderStaticPage(reqPath, "/index.html", req, res);
                 break;
             case ('/api/whoami'):
                 parseHeader(headers, req, res);
