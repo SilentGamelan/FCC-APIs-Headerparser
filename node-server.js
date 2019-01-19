@@ -23,11 +23,22 @@ const MIMETYPE = {
     'bmp':  'img/bmp',
     'gif':  'img/gif',
     'ico':  'img/x-icon'
-}
+};
 
 const publicPath = "./public/";
 const viewsPath = "./views/";
-    
+
+const STATICPATH = {
+    'html':  viewsPath,
+    'css':   publicPath,
+     "js":   publicPath,
+     'jpg':  publicPath,
+     'jpeg': publicPath,
+     'bmp':  publicPath,
+     'gif':  publicPath,
+     'ico':  publicPath
+};
+  
 
    
 /*
@@ -51,21 +62,23 @@ const server = http.createServer((req, res) => {
         console.error(err, err.name, err.message);
         res.statusCode = CLIENTERROR;
         console.error(err, err.name, err.message);
-        res.end('Error: Please contact the administrator');
+        res.end('Error: ' + CLIENTERROR);
     });
 
-    let reqURL = URL.parse(url, true).pathname;
-
+    
+    let reqPath = URL.parse(url, true).pathname;  
+    
     if(method === 'GET') {
-        switch(reqURL) {
+        let reqFile = req.url.split(reqPath)
+        switch(reqPath) {
             case '/':
-                renderStaticPage("index.html", req, res);
+                renderStaticPage(reqPath, "./index.html", req, res);
                 break;
             case ('/api/whoami'):
                 parseHeader(headers, req, res);
                 break;
             default:
-                renderStaticPage(reqURL, req, res);
+                renderStaticPage(reqPath, reqFile, req, res);
                 break;
         }
     } else {
@@ -74,11 +87,6 @@ const server = http.createServer((req, res) => {
         res.write("Method Not Supported Yet")
         res.end();
     }
-
-        // !TODO
-        // fix missing pageName variable
-        //      https://stackoverflow.com/a/26354478
-        // - delete node-router.js
        
 });
 
@@ -101,13 +109,34 @@ function parseHeader(headers, req, res) {
     res.end();
 }
    
-function renderStaticPage(reqURL, req, res) {
+function renderStaticPage(reqPath, reqFile, req, res) {
+    // Extract requested file, if just a path given, reqFile will be falsey (returns {'',''})
+    // (splits the path from the final file if any)
+    // Extract the file extension, if any, used to select correct MIME type and static path
+    // if no extension, append html as default
     
-    let contentType = "text/html";
-    
-    // extract the file extension, if any
-    let ext = reqURL.match(/\.([a-zA-Z]{1,4})$/);
 
+    // Regex ensures ext only captured if file also present (xxx/.css won't be accepted)  
+    // reqFile.match(/\/\w+\.([a-zA-Z]{1,4})$/); -> Wasn't working, made changes to path/file handling
+
+    if(reqFile[1]) {
+        var ext = reqFile.match(/\.([a-zA-Z]{1,4})$/)[1];
+        reqPath = STATICPATH[ext] + reqFile;
+    } else {
+        // if no file specified, sub in a {last_node_of_pathname}.html
+        // so /cheese/crackers -> /cheese/crackers/crackers.html
+        var ext = 'html';
+        reqPath = STATICPATH[ext] + reqPath.split('/').pop + ".html"
+    }
+
+    let contentType = MIMETYPE[ext];
+    if(!contentType) {
+        res.writeHead(SERVERERROR);
+        console.error("ERROR: Content Type Not Supported");
+        res.write("ERROR: Content Type Not Supported");
+        res.end();
+    }
+    
     try {    
         fs.readFile(reqURL, (err, data) => {
         
@@ -121,7 +150,7 @@ function renderStaticPage(reqURL, req, res) {
                     res.end();
                     break;   
                 case 'ENOENT':
-                    if(pageName !== NOTFOUND+".html") {
+                    if(reqFile !== NOTFOUND + ".html") {
                         renderStaticPage(NOTFOUND, req, res);
                     } else {
                         console.error("This is embarressing - our 404 page has gone missing...")
