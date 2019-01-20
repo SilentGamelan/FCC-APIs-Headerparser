@@ -55,7 +55,7 @@ const server = http.createServer((req, res) => {
 
 const server = http.createServer((req, res) => {
     // destructuring syntax -> { x, y } = obj 
-    const { headers, method, url } = req;
+    const { headers, method } = req;
     
 
     req.on('error', (err) => {
@@ -66,19 +66,18 @@ const server = http.createServer((req, res) => {
     });
 
     
-    let reqPath = URL.parse(url, true).pathname;  
-    
+    let reqPath = URL.parse(req.url, true).pathname;  
+
     if(method === 'GET') {
-        let reqFile = req.url.split(reqPath)
         switch(reqPath) {
             case '/':
-                renderStaticPage(reqPath, "/index.html", req, res);
+                renderStaticPage("/index.html", req, res);
                 break;
             case ('/api/whoami'):
                 parseHeader(headers, req, res);
                 break;
             default:
-                renderStaticPage(reqPath, reqFile, req, res);
+                renderStaticPage(reqPath, req, res);
                 break;
         }
     } else {
@@ -109,7 +108,7 @@ function parseHeader(headers, req, res) {
     res.end();
 }
    
-function renderStaticPage(reqPath, reqFile, req, res) {
+function renderStaticPage(reqPath, req, res) {
     // Extract requested file, if just a path given, reqFile will be falsey (returns {'',''})
     // (splits the path from the final file if any)
     // Extract the file extension, if any, used to select correct MIME type and static path
@@ -118,7 +117,7 @@ function renderStaticPage(reqPath, reqFile, req, res) {
 
     // Regex ensures ext only captured if file also present (xxx/.css won't be accepted)  
     // reqFile.match(/\/\w+\.([a-zA-Z]{1,4})$/); -> Wasn't working, made changes to path/file handling
-
+/*
     if(reqFile[1]) {
         var ext = reqFile.match(/\.([a-zA-Z]{1,4})$/)[1];
         reqPath = STATICPATH[ext] + reqFile;
@@ -126,10 +125,29 @@ function renderStaticPage(reqPath, reqFile, req, res) {
         // if no file specified, sub in a {last_node_of_pathname}.html
         // so /cheese/crackers -> /cheese/crackers/crackers.html
         var ext = 'html';
-        reqPath = STATICPATH[ext] + reqPath.split('/').pop + ".html"
+        reqPath = STATICPATH[ext] + reqPath.split('/').pop() + ".html"
+    }
+*/
+    
+    let splitPath = reqPath.split("/");
+
+    var reqFile = splitPath.slice(-1).pop();
+    if(!reqFile) {
+        reqFile = splitPath[splitPath.length - 1];
+    } 
+
+    let ext = reqPath.match(/\.([a-zA-Z]{1,4})$/);
+
+    if(!ext) {
+        ext = "html";
+        reqFile = reqFile + ".html";
+    } else {
+        ext = ext.pop();
     }
 
+    let reqURL = STATICPATH[ext] + reqFile;
     let contentType = MIMETYPE[ext];
+    
     if(!contentType) {
         res.writeHead(SERVERERROR);
         console.error("ERROR: Content Type Not Supported");
@@ -151,7 +169,7 @@ function renderStaticPage(reqPath, reqFile, req, res) {
                     break;   
                 case 'ENOENT':
                     if(reqFile !== NOTFOUND + ".html") {
-                        renderStaticPage(NOTFOUND, req, res);
+                        renderStaticPage("/404.html", req, res);
                     } else {
                         console.error("This is embarressing - our 404 page has gone missing...")
                         console.error(data, err.code, err.message);
@@ -159,6 +177,7 @@ function renderStaticPage(reqPath, reqFile, req, res) {
                         res.write("404 - File not found");
                         res.end();
                     }
+                    break;
                 case 'EACCES':
                     console.error("Problem reading from file");
                     console.error(data, err.code, err.message);
@@ -168,6 +187,7 @@ function renderStaticPage(reqPath, reqFile, req, res) {
                 default: 
                     console.error("Server Error: please contact the administrator");
                     console.error(data, err.code, err.message);
+                    break;
                 }
             });
         } catch(e) {
@@ -182,3 +202,4 @@ function getIP(headers, req) {
     req.socket.remoteAddress ||
     (req.connection.socket ? req.connection.socket.remoteAddress : null);
 }
+
