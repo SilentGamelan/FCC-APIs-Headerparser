@@ -2,6 +2,8 @@
 //
 // Basic webserver created with vanilla node.js
 // Recreates functionality found in server.js without using express
+//
+// 
 
 const http = require('http');
 const URL = require('url'); 
@@ -15,28 +17,30 @@ const NOTFOUND = 404
 const SERVERERROR = 500
 
 const MIMETYPE = {
-   'html':  'text/html',
-   'css':   'text/css',
-    "js":    'text/js',
-    'jpg':  'img/jpeg',
-    'jpeg': 'img/jpeg',
-    'bmp':  'img/bmp',
-    'gif':  'img/gif',
-    'ico':  'img/x-icon'
+   '.html':  'text/html',
+   '.css':   'text/css',
+    ".js":    'text/js',
+    '.jpg':  'img/jpeg',
+    '.jpeg': 'img/jpeg',
+    '.bmp':  'img/bmp',
+    '.gif':  'img/gif',
+    '.ico':  null
+    //'.ico':  'img/x-icon'
 };
 
 const publicPath = "./public/";
 const viewsPath = "./views/";
 
 const STATICPATH = {
-    'html':  viewsPath,
-    'css':   publicPath,
-     "js":   publicPath,
-     'jpg':  publicPath,
-     'jpeg': publicPath,
-     'bmp':  publicPath,
-     'gif':  publicPath,
-     'ico':  publicPath
+    '.html':  viewsPath,
+    '.css':   publicPath,
+     ".js":   publicPath,
+     '.jpg':  publicPath,
+     '.jpeg': publicPath,
+     '.bmp':  publicPath,
+     '.gif':  publicPath,
+     '.ico':  null
+     //'.ico':  publicPath
 };
   
 
@@ -136,16 +140,16 @@ function renderStaticPage(reqPath, req, res) {
         reqFile = splitPath[splitPath.length - 1];
     } 
 
-    let ext = reqPath.match(/\.([a-zA-Z]{1,4})$/);
+    let ext = reqPath.match(/(\.[a-zA-Z]{1,4})$/);
 
     if(!ext) {
-        ext = "html";
-        reqFile = reqFile + ".html";
+        ext = ".html";
+        reqFile = reqFile + ext;
     } else {
         ext = ext.pop();
     }
 
-    let reqURL = STATICPATH[ext] + reqFile;
+    
     let contentType = MIMETYPE[ext];
     
     if(!contentType) {
@@ -153,8 +157,11 @@ function renderStaticPage(reqPath, req, res) {
         console.error("ERROR: Content Type Not Supported");
         res.write("ERROR: Content Type Not Supported");
         res.end();
+        return;
     }
     
+    let reqURL = STATICPATH[ext] + reqFile;
+
     try {    
         fs.readFile(reqURL, (err, data) => {
         
