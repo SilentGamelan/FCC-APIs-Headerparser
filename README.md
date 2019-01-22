@@ -1,4 +1,20 @@
-# API Project: Request Header Parser Microservice for freeCodeCamp
+# API Project: Request Header Parser Microservice for freeCodeCamp - *alternate version*
+
+After completing the original project utilising express to set up the http server and routing behaviour, I was curious to see if I could acheive the same result while only using vanilla node.
+
+`server.js` and `node-router.js` contain the express version, while `node-server.js` is the result of my experiments; `node-server.js` runs as the default on this glitch.
+
+It meets the user story succesfully, and is structured to easily allow the addition of other routes to other web-apps. Currently it also supports static pages, and is capable of serving scripts, css, and some image types.
+
+I have implemented some try-catch error checking during the static page serving, and the code will automatically return a 404 page if a resource isn't found.
+
+The directory structure is abstracted away from the URL entered by the user - so although a user might enter a long address, it will still resolve internal from the specified folders for static pages.
+
+This introduces some unwanted behaviour, as its possible to use arbitary URL and all files in the static folders are currently accessible to the user - including scripts.
+
+I intend to extent the server as a side-project at a later date in order to impose a virtual URL/directory structure which should prevent direct access to files without a page link.
+
+NB: I kept the default boilerplate directory names of public and views to avoid any isses with FCC's automatic checks - going forward, I would likley use a more logical `/scripts` `/css` `/images` `/static` scheme.  
 
 ### User stories:
 1. I can get the IP address, preferred languages (from header `Accept-Language`) and system infos (from header `User-Agent`) for my device.
