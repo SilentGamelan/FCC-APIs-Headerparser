@@ -5,6 +5,7 @@
 //
 // 
 
+// Setup Options
 const http = require('http');
 const URL = require('url'); 
 const fs = require('fs');
@@ -16,6 +17,7 @@ const CLIENTERROR = 400
 const NOTFOUND = 404
 const SERVERERROR = 500
 
+// Media content-types
 const MIMETYPE = {
    '.html':  'text/html',
    '.css':   'text/css',
@@ -24,13 +26,14 @@ const MIMETYPE = {
     '.jpeg': 'img/jpeg',
     '.bmp':  'img/bmp',
     '.gif':  'img/gif',
-    '.ico':  null
-    //'.ico':  'img/x-icon'
+    '.ico':  'img/x-icon'
 };
 
+// Configurable path names
 const publicPath = "./public/";
 const viewsPath = "./views/";
 
+// Set expected file locations by type
 const STATICPATH = {
     '.html':  viewsPath,
     '.css':   publicPath,
@@ -39,23 +42,15 @@ const STATICPATH = {
      '.jpeg': publicPath,
      '.bmp':  publicPath,
      '.gif':  publicPath,
-     '.ico':  null
-     //'.ico':  publicPath
+     '.ico':  publicPath,
+     '.ico':  publicPath
 };
   
 
    
-/*
 // Status code 200 = standard HTTP success response (OK)
 // Content type = Message Body Information Header
 // res.end() = end HTTP response, can send optional text only message
-
-const server = http.createServer((req, res) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end('Hello World\n');
-});
-*/
 
 const server = http.createServer((req, res) => {
     // destructuring syntax -> { x, y } = obj 
@@ -69,9 +64,11 @@ const server = http.createServer((req, res) => {
         res.end('Error: ' + CLIENTERROR);
     });
 
-    
+    // parses path from request and so will strip HTTP query strings
+    // if required, remember to assign and pass them after this line
     let reqPath = URL.parse(req.url, true).pathname;  
 
+    // Add more routes if required here
     if(method === 'GET') {
         switch(reqPath) {
             case '/':
@@ -98,6 +95,7 @@ server.listen(port, hostname, () => {
 });
 
 
+// Returns parsed header information as per FCC project requirements
 function parseHeader(headers, req, res) {
 
     let ip = getIP(headers, req);
@@ -111,27 +109,23 @@ function parseHeader(headers, req, res) {
     res.write(JSON.stringify(parsedHeader));
     res.end();
 }
-   
-function renderStaticPage(reqPath, req, res) {
-    // Extract requested file, if just a path given, reqFile will be falsey (returns {'',''})
-    // (splits the path from the final file if any)
-    // Extract the file extension, if any, used to select correct MIME type and static path
-    // if no extension, append html as default
-    
 
+
+// Attempt to render requested page based on URL given
+// Will automatically handle pathing for files based upon extension using dictionary objects
+// declared in main function
+// 
+// Will convert any incomplete or 'folder' request (ie; no extension given) by substituting in
+// an .html request based on the last section of the URL path
+
+function renderStaticPage(reqPath, req, res) {
+    // Extracts requested file name from URL, if just a path given, reqFile will be falsey (returns {'',''})
+    // Handles URLs ending in '/' or alphanumeric without extension, eg; 'main/about/aboutus' & 'main/about/aboutus/'
+    //
+    // Then extracts the file extension, if any, used to select correct MIME type and static path
+    // if no extension, append html as default 
+    //
     // Regex ensures ext only captured if file also present (xxx/.css won't be accepted)  
-    // reqFile.match(/\/\w+\.([a-zA-Z]{1,4})$/); -> Wasn't working, made changes to path/file handling
-/*
-    if(reqFile[1]) {
-        var ext = reqFile.match(/\.([a-zA-Z]{1,4})$/)[1];
-        reqPath = STATICPATH[ext] + reqFile;
-    } else {
-        // if no file specified, sub in a {last_node_of_pathname}.html
-        // so /cheese/crackers -> /cheese/crackers/crackers.html
-        var ext = 'html';
-        reqPath = STATICPATH[ext] + reqPath.split('/').pop() + ".html"
-    }
-*/
     
     let splitPath = reqPath.split("/");
 
@@ -202,7 +196,7 @@ function renderStaticPage(reqPath, req, res) {
     }
 }
 
-
+// IP info can appear in different places in header, checks likely locations
 function getIP(headers, req) {
     return headers['x-forwarded-for'] ||
     req.connection.remoteAddress ||
