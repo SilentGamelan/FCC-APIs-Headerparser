@@ -1,8 +1,20 @@
-# API Project: Request Header Parser Microservice for freeCodeCamp - *alternate version*
+# API Project: Request Header Parser Microservice for freeCodeCamp - 
+*original version*
+
+Successfully parses and returns the required HTTP header information, using node and express.
+
+`server.js` and `node-router.js` contain the express version, while `node-server` contains the result of my experiments to rewrite it using only node.
+
+I made an alteration to the original structure, and placed the routing logic the separate `node-router.js` file.
+
+This glitch is currently set up to run the alternate version as default; please change the package.json to run the express version.
+
+Both will return the same information
+---
+
+*alternate version*
 
 After completing the original project utilising express to set up the http server and routing behaviour, I was curious to see if I could acheive the same result while only using vanilla node.
-
-`server.js` and `node-router.js` contain the express version, while `node-server.js` is the result of my experiments; `node-server.js` runs as the default on this glitch.
 
 It meets the user story succesfully, and is structured to easily allow the addition of other routes to other web-apps. Currently it also supports static pages, and is capable of serving scripts, css, and some image types.
 
